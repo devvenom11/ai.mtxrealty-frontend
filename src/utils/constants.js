@@ -1,0 +1,1 @@
+export const API_PATH='http://13.60.73.219:7000'
