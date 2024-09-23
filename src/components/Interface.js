@@ -1,22 +1,21 @@
 import { PlusIcon, SubmitArrow } from "@/icons/Icons";
+import { auth } from "@/lib/firebase";
+import { updateDocument } from "@/utils/helpers";
 import { useState, useEffect } from "react";
 
-
-const ChatInterface = ({ chat, setChats }) => {
+const ChatInterface = ({ chat, setChats, chats }) => {
   const [input, setInput] = useState("");
   const [height, setHeight] = useState(0);
-
-
+  const user = auth.currentUser;
 
   useEffect(() => {
     const updateHeight = () => {
-      setHeight(window.innerHeight-70);
+      setHeight(window.innerHeight - 70);
     };
     updateHeight();
-    window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
   }, []);
-
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -78,12 +77,12 @@ const ChatInterface = ({ chat, setChats }) => {
     const interval = setInterval(() => {
       if (index < text.length) {
         currentMessage += text.charAt(index);
-        updateChatMessages(chats, true, currentMessage, chatId, sessionId); 
+        updateChatMessages(chats, true, currentMessage, chatId, sessionId);
         index++;
       } else {
         clearInterval(interval);
         const updatedMessages = [...chats, { text, sender: "bot" }];
-        updateChatMessages(updatedMessages, false, "", chatId, sessionId); 
+        updateChatMessages(updatedMessages, false, "", chatId, sessionId);
       }
     }, 50);
   };
@@ -108,20 +107,25 @@ const ChatInterface = ({ chat, setChats }) => {
     chatId,
     sessionId
   ) => {
-    setChats((prevChats) =>
-      prevChats.map((c) =>
-        c.id === chatId
-          ? {
-              ...c,
-              messages: updatedMessages,
-              isTyping: isTyping,
-              botMessage: botMessage,
-              title: getTitle(updatedMessages[0].text),
-              sessionId,
-            }
-          : c
-      )
+    const updatedChats = chats.map((c) =>
+      c.id === chatId
+        ? {
+            ...c,
+            messages: updatedMessages,
+            isTyping: isTyping,
+            botMessage: botMessage,
+            title: getTitle(updatedMessages[0].text),
+            sessionId,
+          }
+        : c
     );
+    setChats(updatedChats);
+    if (user) {
+      const payload = {
+        chatHistory: updatedChats,
+      };
+      updateDocument("chat_history", user?.uid, payload);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -137,9 +141,12 @@ const ChatInterface = ({ chat, setChats }) => {
   };
 
   return (
-    <div style={{ height: `${height}px` }} className="flex flex-col w-full max-w-2xl mx-auto">
+    <div
+      style={{ height: `${height}px` }}
+      className="flex flex-col w-full max-w-2xl mx-auto"
+    >
       <div className="flex-1 p-4 pt-6 overflow-y-auto">
-        {chat.messages.map((message, index) =>
+        {chat?.messages?.map((message, index) =>
           message.sender === "user" ? (
             <div key={index} className="mb-4 flex">
               <div className="bg-background flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
@@ -178,7 +185,7 @@ const ChatInterface = ({ chat, setChats }) => {
             </div>
           )
         )}
-        {chat.isTyping && (
+        {chat?.isTyping && (
           <div className="mb-4 flex justify-start">
             <div className="bg-primary text-primary-foreground flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
               <svg
@@ -208,7 +215,7 @@ const ChatInterface = ({ chat, setChats }) => {
               className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 bg-background absolute left-0 top-[13px] size-8 rounded-full p-0 sm:left-4"
               data-state="closed"
             >
-             <PlusIcon />
+              <PlusIcon />
               <span className="sr-only">New Chat</span>
             </button>
             <textarea
@@ -230,7 +237,7 @@ const ChatInterface = ({ chat, setChats }) => {
                 type="submit"
                 disabled={input.length < 2}
               >
-               <SubmitArrow />
+                <SubmitArrow />
                 <span className="sr-only">Send message</span>
               </button>
             </div>
