@@ -1,9 +1,12 @@
 import { PlusIcon, SubmitArrow } from "@/icons/Icons";
+import { auth } from "@/lib/firebase";
+import { updateDocument } from "@/utils/helpers";
 import { useState, useEffect } from "react";
 
-const ChatInterface = ({ chat, setChats }) => {
+const ChatInterface = ({ chat, setChats, chats }) => {
   const [input, setInput] = useState("");
   const [height, setHeight] = useState(0);
+  const user = auth.currentUser;
 
   useEffect(() => {
     const updateHeight = () => {
@@ -86,21 +89,32 @@ const ChatInterface = ({ chat, setChats }) => {
   };
   
 
-  const updateChatMessages = (updatedMessages, isTyping, botMessage, chatId, sessionId) => {
-    setChats((prevChats) =>
-      prevChats.map((c) =>
-        c.id === chatId
-          ? {
-              ...c,
-              messages: updatedMessages,
-              isTyping: isTyping,
-              botMessage: botMessage,
-              title: getTitle(updatedMessages[0].text),
-              sessionId,
-            }
-          : c
-      )
+  const updateChatMessages = (
+    updatedMessages,
+    isTyping,
+    botMessage,
+    chatId,
+    sessionId
+  ) => {
+    const updatedChats = chats.map((c) =>
+      c.id === chatId
+        ? {
+            ...c,
+            messages: updatedMessages,
+            isTyping: isTyping,
+            botMessage: botMessage,
+            title: getTitle(updatedMessages[0].text),
+            sessionId,
+          }
+        : c
     );
+    setChats(updatedChats);
+    if (user) {
+      const payload = {
+        chatHistory: updatedChats,
+      };
+      updateDocument("chat_history", user?.uid, payload);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -116,9 +130,12 @@ const ChatInterface = ({ chat, setChats }) => {
   };
 
   return (
-    <div style={{ height: `${height}px` }} className="flex flex-col w-full max-w-2xl mx-auto">
+    <div
+      style={{ height: `${height}px` }}
+      className="flex flex-col w-full max-w-2xl mx-auto"
+    >
       <div className="flex-1 p-4 pt-6 overflow-y-auto">
-        {chat.messages.map((message, index) =>
+        {chat?.messages?.map((message, index) =>
           message.sender === "user" ? (
             <div key={index} className="mb-4 flex">
               <div className="bg-background flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
@@ -142,7 +159,7 @@ const ChatInterface = ({ chat, setChats }) => {
             </div>
           )
         )}
-        {chat.isTyping && (
+        {chat?.isTyping && (
           <div className="mb-4 flex justify-start">
             <div className="bg-primary text-primary-foreground flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
               <svg fill="currentColor" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" className="size-4">
