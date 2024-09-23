@@ -8,7 +8,19 @@ import { auth } from "@/lib/firebase";
 const Chat = () => {
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState("");
-  const user = auth.currentUser;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null); 
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const handleNewChat = () => {
     const newChat = {
       id: uuidv4(),
@@ -56,24 +68,12 @@ const Chat = () => {
       setChats([defaultChat]);
       setActiveChatId(defaultChat.id);
     }
-  }, []);
+  }, [user]);
 
   return (
     <div className="flex">
-      <Sidebar
-        handleNewChat={handleNewChat}
-        chats={chats}
-        activeChatId={activeChatId}
-        onSelectChat={handleSelectChat}
-        handleDeleteChat={handleDeleteChat}
-      />
-      {chats.length > 0 && (
-        <ChatInterface
-          chat={chats.find((chat) => chat.id === activeChatId)}
-          setChats={setChats}
-          chats={chats}
-        />
-      )}
+      <Sidebar handleNewChat={handleNewChat} chats={chats} activeChatId={activeChatId} onSelectChat={handleSelectChat} handleDeleteChat={handleDeleteChat} />
+      {chats.length > 0 && <ChatInterface chat={chats.find((chat) => chat.id === activeChatId)} setChats={setChats} chats={chats} />}
     </div>
   );
 };

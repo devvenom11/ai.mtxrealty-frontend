@@ -11,10 +11,14 @@ export function Header() {
   const [showDropDown, setShowDropDown] = useState(false);
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setUserData(user);
-    }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserData(user);
+      } else {
+        setUserData(null);
+      }
+    });
+    return () => unsubscribe();
   }, []);
   const getInitialCharacters = (sentence) => {
     const words = sentence.split(" ");

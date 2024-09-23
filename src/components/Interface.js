@@ -6,7 +6,18 @@ import { useState, useEffect } from "react";
 const ChatInterface = ({ chat, setChats, chats }) => {
   const [input, setInput] = useState("");
   const [height, setHeight] = useState(0);
-  const user = auth.currentUser;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null); 
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -16,12 +27,14 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
+
   const handleResponse = (data) => {
     let res = data.answer || "I don't have an answer for that.";
     const links = data.youtube_url ? `<a target='_blank' href="${data.youtube_url}" style="color: blue;">${data.youtube_url}</a><br>` : "";
-    
+
     return `${links} ${res}`.trim();
   };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (input.trim()) {
@@ -87,15 +100,8 @@ const ChatInterface = ({ chat, setChats, chats }) => {
       return text.length > 26 ? text.slice(0, 26) + "..." : text;
     }
   };
-  
 
-  const updateChatMessages = (
-    updatedMessages,
-    isTyping,
-    botMessage,
-    chatId,
-    sessionId
-  ) => {
+  const updateChatMessages = (updatedMessages, isTyping, botMessage, chatId, sessionId) => {
     const updatedChats = chats.map((c) =>
       c.id === chatId
         ? {
@@ -130,10 +136,7 @@ const ChatInterface = ({ chat, setChats, chats }) => {
   };
 
   return (
-    <div
-      style={{ height: `${height}px` }}
-      className="flex flex-col w-full max-w-2xl mx-auto"
-    >
+    <div style={{ height: `${height}px` }} className="flex flex-col w-full max-w-2xl mx-auto">
       <div className="flex-1 p-4 pt-6 overflow-y-auto">
         {chat?.messages?.map((message, index) =>
           message.sender === "user" ? (
@@ -154,7 +157,7 @@ const ChatInterface = ({ chat, setChats, chats }) => {
                 </svg>
               </div>
               <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-                <p dangerouslySetInnerHTML={{__html:message.text}} className="prose prose-p:leading-relaxed prose-pre:p-0 break-words"></p>
+                <p dangerouslySetInnerHTML={{ __html: message.text }} className="prose prose-p:leading-relaxed prose-pre:p-0 break-words"></p>
               </div>
             </div>
           )
