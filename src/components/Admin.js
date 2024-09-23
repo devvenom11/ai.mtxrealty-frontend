@@ -25,7 +25,7 @@ const Admin = () => {
     apiCall("POST", `${API_PATH}/transcribe_all_videos`)
       .then(({ data, success, error }) => {
         if (!success) throw error;
-        toast.success(`${data.message}. Total videos: ${data.transcription_count}`);
+        toast.success(`${data.message}.`);
         
       })
       .catch(() => toast.error("Failed to transcribe videos. Please try again."))
