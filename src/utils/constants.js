@@ -1,1 +1,1 @@
-export const API_PATH='http://13.60.73.219:7000'
+export const API_PATH='http://13.51.177.0:7000'
