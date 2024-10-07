@@ -1,5 +1,4 @@
 "use client";
-import { NextLogo } from "@/icons/Icons";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -38,7 +37,9 @@ export function Header() {
       <div className="px-6 py-4 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <NextLogo />
+            <div className="w-[40px] h-[40x]">
+            <img src="/images/logo.png" className="w-full h-full"/>
+            </div>
           </Link>
         </div>
 
