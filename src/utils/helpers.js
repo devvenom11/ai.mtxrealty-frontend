@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc,deleteDoc } from "firebase/firestore";
 
 export const formatDate = (date) => {
   const day = String(date.getDate()).padStart(2, "0"); // Get day and add leading zero if necessary
@@ -10,6 +10,7 @@ export const formatDate = (date) => {
 };
 
 export async function apiCall(method, path, body = null, headers = {}) {
+
   try {
     const options = {
       method,
@@ -24,7 +25,6 @@ export async function apiCall(method, path, body = null, headers = {}) {
     }
 
     const response = await fetch(path, options);
-
     const data = await response.json();
     if (!response.ok) {
       return { success: false, error: data };
@@ -72,3 +72,4 @@ await updateDoc(docRef, {
     console.log("error++++",error)
   }
 }
+ 

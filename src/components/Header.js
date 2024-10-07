@@ -34,10 +34,10 @@ export function Header() {
   };
   return (
     <header className="border-b border-gray-200">
-      <div className="px-6 py-4 flex justify-between items-center">
+      <div className="px-6 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <div className="w-[40px] h-[40x]">
+            <div className="w-[100px] h-[100x]">
             <img src="/images/logo.png" className="w-full h-full"/>
             </div>
           </Link>

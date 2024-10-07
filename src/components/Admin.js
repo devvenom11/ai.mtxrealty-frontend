@@ -54,6 +54,7 @@ const Admin = () => {
       </div>
       <div className="flex items-start justify-center gap-6 mx-auto container mt-6">
         <AddQuestionAnswer />
+        <DeleteFiles />
       </div>
     </div>
   );
@@ -61,17 +62,53 @@ const Admin = () => {
 
 export default Admin;
 
+const DeleteFiles = () => {
+  const handleDelete = (e) => {
+    e.preventDefault();
+    apiCall("DELETE", "/api/reset_data")  
+      .then(({ success, data, error }) => { 
+        console.log("data---->",data);
+        console.log("Error---->",error);
+        console.log("Success---->",success);
+        if (!success) throw error;
+        toast.success(`${data.message || "Files deleted successfully."}.`); 
+      })
+      .catch((err) => {
+        console.log(" catch====Error---->",err);
+        toast.error(err); // Directly use err for better clarity
+      })
+      .finally(() => {
+        // setLoading(false);
+      });
+  };
+  
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md mr-auto max-w-lg w-[450px]">
+      <h2 className="text-xl font-bold mb-4">Delete files</h2>
+
+      <div className="flex items-center gap-4 mt-36">
+        <button
+          // disabled={transcribing || loadingData}
+          className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-600 disabled:hover:bg-gray-600 text-sm"
+          onClick={handleDelete}
+        >
+          Delete Files
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AddQuestionAnswer = () => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   const handleQuestionAnswer = (e) => {
     e.preventDefault();
     setLoading(true);
     apiCall("POST", "/api/add_question_answers", { question, answer })
-      .then(({ data, success, error }) => { 
+      .then(({ data, success, error }) => {
         if (!success) throw error;
         toast.success(`${data.message}.`);
         setQuestion("");
@@ -88,7 +125,7 @@ const AddQuestionAnswer = () => {
   return (
     <form
       onSubmit={handleQuestionAnswer}
-      className="bg-white p-6 rounded-lg shadow-md mx-auto w-[925px]"
+      className="bg-white p-6 rounded-lg shadow-md ml-auto w-[450px]"
     >
       <h2 className="text-xl font-bold mb-4">Add Question Answer </h2>
       <label className="block">

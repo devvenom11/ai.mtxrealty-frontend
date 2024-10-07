@@ -169,7 +169,7 @@ const Register = () => {
           <div className="xl:w-1/3 md:w-1/2 lg:ml-16 ml-8 md:mt-0 mt-6">
             <div className=" md:block hidden">
               
-              <div className="w-[191px] h-9">
+              <div className="w-[191px] h-[85px]">
                 <img src="/images/logo.png" alt="Logo picture" className="w-full h-full center bg-cover" />
               </div>
             </div>
