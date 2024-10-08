@@ -67,14 +67,11 @@ const DeleteFiles = () => {
     e.preventDefault();
     apiCall("DELETE", "/api/reset_data")  
       .then(({ success, data, error }) => { 
-        console.log("data---->",data);
-        console.log("Error---->",error);
-        console.log("Success---->",success);
+     
         if (!success) throw error;
         toast.success(`${data.message || "Files deleted successfully."}.`); 
       })
       .catch((err) => {
-        console.log(" catch====Error---->",err);
         toast.error(err); // Directly use err for better clarity
       })
       .finally(() => {
@@ -88,7 +85,6 @@ const DeleteFiles = () => {
 
       <div className="flex items-center gap-4 mt-36">
         <button
-          // disabled={transcribing || loadingData}
           className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-600 disabled:hover:bg-gray-600 text-sm"
           onClick={handleDelete}
         >

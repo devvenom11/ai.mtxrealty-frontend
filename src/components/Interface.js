@@ -29,11 +29,16 @@ const ChatInterface = ({ chat, setChats, chats }) => {
   }, []);
 
   const handleResponse = (data) => {
-    let res = data.answer || "I don't have an answer for that.";
-    const links = data.youtube_url ? `<a target='_blank' href="${data.youtube_url}" style="color: blue;">${data.youtube_url}</a><br>` : "";
-
-    return `${links} ${res}`.trim();
+    const urlRegex = /(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?)/g; // Match URLs with or without protocol
+    const url = data.answer.match(urlRegex); // Extract URL if present
+    
+    const clickableUrl = url ? (url[0].startsWith("http") ? url[0] : `https://${url[0]}`) : null;
+  
+    const response = data.answer.replace(urlRegex, ''); // Remove the URL from the answer text
+ 
+    return { text: response.trim(), url: clickableUrl }; // Return the text and clickable URL
   };
+  
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -58,8 +63,8 @@ const ChatInterface = ({ chat, setChats, chats }) => {
 
         if (response.ok) {
           const data = await response.json();
-          const botResponse = handleResponse(data);
-          simulateBotTyping(botResponse, updatedMessages, data.session_id, chat.id);
+          const {text, url} = handleResponse(data);
+          simulateBotTyping(text, url,updatedMessages, data.session_id, chat.id);
         } else {
           console.error("API call failed with status:", response.status);
           simulateBotTyping("Something went wrong. Please try again later.", updatedMessages, chat.sessionId, chat.id);
@@ -71,9 +76,10 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     }
   };
 
-  const simulateBotTyping = (text, chats, sessionId, chatId) => {
+  const simulateBotTyping = (text, url, chats, sessionId, chatId) => {
     let currentMessage = "";
     let index = 0;
+  
     const interval = setInterval(() => {
       if (index < text.length && !text.startsWith("<")) {
         // Regular typing for plain text
@@ -81,14 +87,20 @@ const ChatInterface = ({ chat, setChats, chats }) => {
         updateChatMessages(chats, true, currentMessage, chatId, sessionId);
         index++;
       } else {
-        // When we encounter HTML, clear interval and update message directly
+        // When we encounter HTML or text ends, clear interval and update message directly
         clearInterval(interval);
-        const updatedMessages = [...chats, { text, sender: "bot" }];
+  
+        // Append clickable URL if available
+        const finalMessage = url
+          ? `${text} <br/><a href="${url}" target="_blank" style="color: blue;">${url}</a>`
+          : text;
+  
+        const updatedMessages = [...chats, { text: finalMessage, sender: "bot" }];
         updateChatMessages(updatedMessages, false, "", chatId, sessionId);
       }
     }, 50);
   };
-
+  
   const getTitle = (text) => {
     function containsGreeting(text) {
       const greetings = /\b(hello|hi|hey|greetings|good\s*morning|good\s*afternoon|good\s*evening)\b/i;
