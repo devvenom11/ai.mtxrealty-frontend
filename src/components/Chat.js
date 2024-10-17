@@ -38,9 +38,16 @@ const Chat = () => {
   };
 
   const handleDeleteChat = (id) => {
-    let temp = chats.filter((c) => c.id !== id);
-    setActiveChatId(temp[0].id);
-    setChats(temp);
+    setChats((prevChats) => {
+      const temp = prevChats.filter((c) => c.id !== id);
+
+      if (temp.length > 0) {
+        setActiveChatId(temp[temp.length - 1].id);
+      } else {
+        setActiveChatId("");
+      }
+      return temp;
+    });
   };
 
   useEffect(() => {
