@@ -21,3 +21,6 @@ body {
 .animate-blink {
   animation: blink 1s infinite;
 }
+.answers a {
+padding: 6px 0px !important;
+}

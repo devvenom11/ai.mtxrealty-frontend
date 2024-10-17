@@ -34,9 +34,9 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     
     const clickableUrl = url ? (url[0].startsWith("http") ? url[0] : `https://${url[0]}`) : null;
   
-    const response = data.answer.replace(urlRegex, ''); // Remove the URL from the answer text
+    const response = data.answer.replace(urlRegex, '');  
  
-    return { text: response.trim(), url: clickableUrl }; // Return the text and clickable URL
+    return { text: response.trim(), url: clickableUrl }; 
   };
   
 
@@ -169,7 +169,7 @@ const ChatInterface = ({ chat, setChats, chats }) => {
                 </svg>
               </div>
               <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-                <p dangerouslySetInnerHTML={{ __html: message.text }} className="prose prose-p:leading-relaxed prose-pre:p-0 break-words"></p>
+                <p dangerouslySetInnerHTML={{ __html: message.text }} className="prose prose-p:leading-relaxed prose-pre:p-0 break-words answers flex flex-col"></p>
               </div>
             </div>
           )
