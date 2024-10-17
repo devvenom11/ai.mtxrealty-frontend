@@ -22,5 +22,6 @@ body {
   animation: blink 1s infinite;
 }
 .answers a {
-padding: 6px 0px !important;
+  color: blue;
+  text-decoration: underline;
 }

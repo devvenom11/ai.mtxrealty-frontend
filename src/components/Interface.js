@@ -2,6 +2,7 @@ import { PlusIcon, SubmitArrow } from "@/icons/Icons";
 import { auth } from "@/lib/firebase";
 import { updateDocument } from "@/utils/helpers";
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 const ChatInterface = ({ chat, setChats, chats }) => {
   const [input, setInput] = useState("");
@@ -13,7 +14,7 @@ const ChatInterface = ({ chat, setChats, chats }) => {
       if (user) {
         setUser(user);
       } else {
-        setUser(null); 
+        setUser(null);
       }
     });
     return () => unsubscribe();
@@ -28,17 +29,16 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
-  const handleResponse = (data) => {
+  const extractURLsFromText = (answer) => {
     const urlRegex = /(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?)/g; // Match URLs with or without protocol
-    const url = data.answer.match(urlRegex); // Extract URL if present
-    
+    const url = answer.match(urlRegex); // Extract URL if present
+
     const clickableUrl = url ? (url[0].startsWith("http") ? url[0] : `https://${url[0]}`) : null;
-  
-    const response = data.answer.replace(urlRegex, '');  
- 
-    return { text: response.trim(), url: clickableUrl }; 
+
+    const response = answer.replace(urlRegex, `[${clickableUrl}](${clickableUrl})`);
+
+    return response;
   };
-  
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -63,8 +63,8 @@ const ChatInterface = ({ chat, setChats, chats }) => {
 
         if (response.ok) {
           const data = await response.json();
-          const {text, url} = handleResponse(data);
-          simulateBotTyping(text, url,updatedMessages, data.session_id, chat.id);
+          const text = extractURLsFromText(data.answer);
+          simulateBotTyping(text, updatedMessages, data.session_id, chat.id, data.youtube_url);
         } else {
           console.error("API call failed with status:", response.status);
           simulateBotTyping("Something went wrong. Please try again later.", updatedMessages, chat.sessionId, chat.id);
@@ -76,31 +76,23 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     }
   };
 
-  const simulateBotTyping = (text, url, chats, sessionId, chatId) => {
+  const simulateBotTyping = (text, chats, sessionId, chatId, url) => {
     let currentMessage = "";
     let index = 0;
-  
+
     const interval = setInterval(() => {
       if (index < text.length && !text.startsWith("<")) {
-        // Regular typing for plain text
         currentMessage += text.charAt(index);
-        updateChatMessages(chats, true, currentMessage, chatId, sessionId);
+        updateChatMessages(chats, true, currentMessage, chatId, sessionId, url);
         index++;
       } else {
-        // When we encounter HTML or text ends, clear interval and update message directly
         clearInterval(interval);
-  
-        // Append clickable URL if available
-        const finalMessage = url
-          ? `${text} <br/><a href="${url}" target="_blank" style="color: blue;">${url}</a>`
-          : text;
-  
-        const updatedMessages = [...chats, { text: finalMessage, sender: "bot" }];
-        updateChatMessages(updatedMessages, false, "", chatId, sessionId);
+        const updatedMessages = [...chats, { text, sender: "bot", url }];
+        updateChatMessages(updatedMessages, false, "", chatId, sessionId, "");
       }
-    }, 50);
+    }, 20);
   };
-  
+
   const getTitle = (text) => {
     function containsGreeting(text) {
       const greetings = /\b(hello|hi|hey|greetings|good\s*morning|good\s*afternoon|good\s*evening)\b/i;
@@ -113,13 +105,14 @@ const ChatInterface = ({ chat, setChats, chats }) => {
     }
   };
 
-  const updateChatMessages = (updatedMessages, isTyping, botMessage, chatId, sessionId) => {
+  const updateChatMessages = (updatedMessages, isTyping, botMessage, chatId, sessionId, url) => {
     const updatedChats = chats.map((c) =>
       c.id === chatId
         ? {
             ...c,
             messages: updatedMessages,
             isTyping: isTyping,
+            url,
             botMessage: botMessage,
             title: getTitle(updatedMessages[0].text),
             sessionId,
@@ -169,11 +162,19 @@ const ChatInterface = ({ chat, setChats, chats }) => {
                 </svg>
               </div>
               <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-                <p dangerouslySetInnerHTML={{ __html: message.text }} className="prose prose-p:leading-relaxed prose-pre:p-0 break-words answers flex flex-col"></p>
+                <div className="answers flex flex-col gap-2">
+                  {message.url && (
+                    <a className="pb-2" href={message.url} target="_blank" rel="noreferrer">
+                      {message.url}
+                    </a>
+                  )}
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                </div>
               </div>
             </div>
           )
         )}
+        {console.log("chat", chat)}
         {chat?.isTyping && (
           <div className="mb-4 flex justify-start">
             <div className="bg-primary text-primary-foreground flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
@@ -183,10 +184,19 @@ const ChatInterface = ({ chat, setChats, chats }) => {
               </svg>
             </div>
             <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-              <p className="prose prose-p:leading-relaxed prose-pre:p-0 break-words">
-                {chat.botMessage}
+              {chat.botMessage ? (
+                <div className="answers flex flex-col gap-2">
+                  {" "}
+                  {chat.url && (
+                    <a className="pb-2" href={chat.url} target="_blank" rel="noreferrer">
+                      {chat.url}
+                    </a>
+                  )}
+                  <ReactMarkdown>{chat.botMessage}</ReactMarkdown>
+                </div>
+              ) : (
                 <span className="animate-blink">|</span>
-              </p>
+              )}
             </div>
           </div>
         )}
