@@ -78,7 +78,7 @@ const Chat = () => {
   }, [user]);
 
   return (
-    <div className="flex">
+    <div className="flex bg-white dark:bg-[#212121]">
       <Sidebar handleNewChat={handleNewChat} chats={chats} activeChatId={activeChatId} onSelectChat={handleSelectChat} handleDeleteChat={handleDeleteChat} />
       {chats.length > 0 && <ChatInterface chat={chats.find((chat) => chat.id === activeChatId)} setChats={setChats} chats={chats} />}
     </div>

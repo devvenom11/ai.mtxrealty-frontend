@@ -5,6 +5,7 @@
 
 body {
   font-family: "Inter", sans-serif;
+  overflow: hidden;
 }
 @keyframes blink {
   0% {
@@ -22,6 +23,8 @@ body {
   animation: blink 1s infinite;
 }
 .answers a {
-  color: blue;
-  text-decoration: underline;
+  color: #1d4ed8;
+}
+.dark .answers a{
+  color: #7ab7ff;
 }

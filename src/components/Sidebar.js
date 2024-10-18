@@ -12,58 +12,57 @@ const Sidebar = ({ handleNewChat, chats, activeChatId, onSelectChat, handleDelet
 
   return (
     <div className="relative">
-      
-      <div className="sm:hidden p-4 absolute z-50 top-[18px]">
-        <div onClick={toggleSidebar} className="cursor-pointer">
-          {isOpen ? <CrossIcon /> : <Hamburger />}
-        </div>
-      </div>
-
-    
-      <div
-      style={{ zIndex: 10 }}
-        className={`w-[260px] h-[calc(100vh-92px)]  shadow-md bg-white transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } sm:translate-x-0 fixed sm:relative`}
-      >
-        <div className="flex items-center justify-between mt-[20px] px-4">
-          <h3 className="pl-[30px] sm:pl-0 pr-4 py-2 text-lg font-semibold">Chats</h3>
-          <div className="icon-xl-heavy cursor-pointer" onClick={handleNewChat}>
-            <NewChatIcon />
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <ul>
-            {chats.map((chat) => (
-              <li
-                key={chat.id}
-                className={`relative group px-4 py-2 cursor-pointer rounded-lg ml-[15px] flex justify-between items-center ${
-                  activeChatId === chat.id
-                    ? "bg-gray-100"
-                    : "hover:bg-gray-100 ease-linear duration-200"
-                }`}
-                onClick={() => onSelectChat(chat.id)}
-              >
-                <span className="capitalize">{chat.title}</span>
-                {chats.length > 1 && (
-                  <TrashIcon id={activeChatId} callback={handleDeleteChat} />
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <style jsx>{`
-        .dots {
-          opacity: 0;
-        }
-        li:hover .dots {
-          opacity: 1;
-        }
-      `}</style>
+  <div className="sm:hidden p-4 absolute z-50 top-[18px]">
+    <div onClick={toggleSidebar} className="cursor-pointer">
+      {isOpen ? <CrossIcon /> : <Hamburger />}
     </div>
+  </div>
+
+  <div
+    style={{ zIndex: 10 }}
+    className={`w-[260px] h-[calc(100vh-92px)] shadow-md dark:border-r border-gray-700 bg-white dark:bg-[#212121] transition-transform duration-300 ease-in-out ${
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    } sm:translate-x-0 fixed sm:relative`}
+  >
+    <div className="flex items-center justify-between mt-[20px] px-4">
+      <h3 className="pl-[30px] sm:pl-0 pr-4 py-2 text-lg font-semibold dark:text-gray-100">Chats</h3>
+      <div className="icon-xl-heavy cursor-pointer text-gray-800 dark:text-gray-400" onClick={handleNewChat}>
+        <NewChatIcon />
+      </div>
+    </div>
+
+    <div className="mt-4">
+      <ul>
+        {chats.map((chat) => (
+          <li
+            key={chat.id}
+            className={`relative group px-4 py-2 cursor-pointer rounded-lg ml-[15px] flex justify-between items-center ${
+              activeChatId === chat.id
+                ? "bg-gray-100 dark:bg-[#2f2f2f]"
+                : "hover:bg-gray-100 dark:hover:bg-[#2f2f2f] ease-linear duration-200"
+            }`}
+            onClick={() => onSelectChat(chat.id)}
+          >
+            <span className="capitalize dark:text-gray-100">{chat.title}</span>
+            {chats.length > 1 && (
+              <TrashIcon id={activeChatId} callback={handleDeleteChat} />
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <style jsx>{`
+    .dots {
+      opacity: 0;
+    }
+    li:hover .dots {
+      opacity: 1;
+    }
+  `}</style>
+</div>
+
   );
 };
 
@@ -73,7 +72,7 @@ const TrashIcon = ({ id, callback }) => {
   return (
     <svg
       onClick={() => callback(id)}
-      className="absolute right-2 hidden text-gray-600 group-hover:block icon icon-tabler icons-tabler-outline icon-tabler-trash"
+      className="absolute right-2 hidden text-gray-600 dark:text-gray-300 group-hover:block icon icon-tabler icons-tabler-outline icon-tabler-trash"
       xmlns="http://www.w3.org/2000/svg"
       width={20}
       height={20}
